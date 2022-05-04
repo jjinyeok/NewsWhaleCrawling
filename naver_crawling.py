@@ -1,9 +1,11 @@
+from ast import keyword
 import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
+import konlpy_test
 
 # 네이버 랭킹 뉴스
 # 언론사별 많이 본 뉴스
@@ -73,8 +75,16 @@ def complete_articles(news_list):
         
         res = requests.get(news_list[i]['news_url']).text
         res = BeautifulSoup(res, 'html.parser')
-        
-        # To-do: 기자를 어디서 찾을 것아며 어떻게 기자가 없는 상황을 방지할 수 있을까?
+
+        ############## ############# ###################
+        # news_media # # media_url # # media_image_src #
+        ############## ############# ###################
+
+        news_media =  res.find('img', 'media_end_head_top_logo_img light_type')['title']
+        media_url = res.find('a', 'media_end_head_top_logo')['href']
+        media_image_src = res.find('img', 'media_end_head_top_logo_img light_type')['src']
+
+         # To-do: 기자를 어디서 찾을 것아며 어떻게 기자가 없는 상황을 방지할 수 있을까?
         #################
         # news_reporter #
         #################
@@ -82,13 +92,6 @@ def complete_articles(news_list):
             news_reporter = res.find('span', 'byline_s').text
         except:
             news_reporter = '기자 없음'
-
-        ############## ############# ###################
-        # news_media # # media_url # # media_image_src #
-        ############## ############# ###################
-        news_media =  res.find('img', 'media_end_head_top_logo_img light_type')['title']
-        media_url = res.find('a', 'media_end_head_top_logo')['href']
-        media_image_src = res.find('img', 'media_end_head_top_logo_img light_type')['src']
 
         #############
         # timestamp #
@@ -99,6 +102,9 @@ def complete_articles(news_list):
             timestamp = res.find('span', 'media_end_head_info_datestamp_time _ARTICLE_MODIFY_DATE_TIME').text
         except:
             pass
+
+        keyword1, keyword2, keyword3 = konlpy_test.get_keywords(res, news_list[i]['news_title'], news_media)
+        print(news_list[i]['news_title'] + ' | ' + news_list[i]['news_url'] + ' | ' + keyword1 + ' ' + keyword2 + ' ' + keyword3)
 
         # news 완성
         news_list[i]['news_reporter'] = news_reporter
