@@ -1,11 +1,5 @@
-from ast import keyword
-import requests
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from webdriver_manager.chrome import ChromeDriverManager
-from bs4 import BeautifulSoup
-import konlpy_test
+
+# 네이버 크롤링과 관련된 함수 모듈
 
 # 네이버 랭킹 뉴스
 # 언론사별 많이 본 뉴스
@@ -21,31 +15,53 @@ import konlpy_test
 # -> 14시 10분, 15시 10분, 16시 10분, 17시 10분, 18시 10분
 # -> 19시 10분, 20시 10분, 21시 10분, 22시 10분, 23시 10분
 
-# 뉴스 리스트: 뉴스 딕셔너리 들어갈 예정
-# 뉴스 딕셔너리:
+# article_list (기사 리스트): article_json (기사 딕셔너리) 들어갈 예정
+# article_json:
 # {
-#     ---DB의 news Table로 이동---
-#     "news_title", (뉴스제목) O
-#     "news_media", (언론사) O
-#     "news_reporter", (기자) △
-#     "news_url", (뉴스 URL) O
-#     "media_url", (언론사 URL)O
-#     "timestamp", (최종수정일자) O
-#     ---DB의 news_keyword Table로 이동---
-#     "keyword1", (연관키워드)
-#     "keyword2", (연관키워드)
-#     "keyword3", (연관키워드)
+#     ---DB의 article Table로 이동---
+#     "article_title", (기사 제목) O
+#     "article_reporter", (기자) △
+#     "article_url", (기사 URL) O
+#     "article_media_name", (언론사 이름) O
+#     "article_media_url", (언론사 URL)O
+#     "article_media_image_src", (언론사 이미지 소스) O
+#     "article_last_modified_time" (최종수정일자) O
+#     ---DB의 article_keyword Table로 이동---
+#     "keyword1", (연관키워드 1)
+#     "keyword2", (연관키워드 2)
+#     "keyword3", (연관키워드 3)
 # }
-#news_list = []
 
-# chrome 드라이버 로드
+# chrome driver 로드하는 function
+# param: null
+# return: 로드 된 chrome driver
 def set_chrome_driver():
+
+    from selenium import webdriver
+    from selenium.webdriver.chrome.service import Service
+    from webdriver_manager.chrome import ChromeDriverManager
+
     chrome_options = webdriver.ChromeOptions()
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
     return driver
 
-# 맨 마지막까지 뉴스를 수집하기 위해 최대한으로 뉴스를 뽑아내는 과정
+
+# 브라우저(chrome) 닫는 function
+# param: set_chrome_driver에서 return 받은 driver
+# return: null
+def close_browser(driver):
+    
+    driver.close()
+
+
+# 맨 마지막까지 기사를 수집하기 위해 최대한으로 기사를 찾아내는 function
+# chrome driver를 통해 마지막 기사까지 '다른 언론사 랭킹 더보기'를 click
+# param: set_chrome_driver에서 return 받은 driver
+# return: null
 def find_all_articles (driver):
+    
+    from selenium.webdriver.common.by import By
+    
     while True:
         try:
             # 다른 언론사 랭킹 더보기 <button> 클릭
@@ -53,68 +69,78 @@ def find_all_articles (driver):
         except:
             break
 
-# 뉴스 제목 <a> find -> news_title, news_url
+
+# article_list안에 있는 article_json을 초기화하는 function
+# 기사 제목에서 article_title, article_url 추출해서 article_list (기사 리스트)에 저장 후 반환
+# param: set_chrome_driver에서 return 받은 driver
+# return: article_list
 def init_articles(driver):
-    news_list = []
-    lis = driver.find_elements(by=By.CSS_SELECTOR, value="a.list_title")
-    # 각 뉴스 제목 <a>로부터 news_titel(뉴스 제목), news_url(뉴스 url) 받아옴
-    for i in range(len(lis)):    
-        ############## ############
-        # news_title # # news_url #
-        ############## ############
-        news_list.append({'news_title': lis[i].text, 'news_url': lis[i].get_attribute('href')})
-    return news_list
+    
+    from selenium.webdriver.common.by import By
 
-# 브라우저(chrome) 닫음
-def close_browser(driver):
-    driver.close()
+    article_list = []
+    # 네이버 랭킹 뉴스 메인 페이지에서 각 뉴스 제목이 들어 있는 <a>로부터 article_title(기사 제목), article_url(기사 url) 받아옴
+    # 여기서 받은 article_url을 기반으로 나머지 article_json을 완성함
+    articles_a_tag_in_ranking_page = driver.find_elements(by=By.CSS_SELECTOR, value="a.list_title")
+    for i in range(len(articles_a_tag_in_ranking_page)):    
+        article_list.append({'article_title': articles_a_tag_in_ranking_page[i].text, 'article_url': articles_a_tag_in_ranking_page[i].get_attribute('href')})
+    return article_list
 
-# news_list 완성
-def complete_articles(news_list):
-    for i in range(len(news_list)):
-        
-        res = requests.get(news_list[i]['news_url']).text
+
+# 모든 article_json을 완성하여 article_list를 완성하는 function
+# param: init_articles에서 초기화하여 article_title과 article_url만 들어 있는 article_list
+# return: 모든 정보가 들어 있는 article_list
+def complete_articles(article_list):
+    
+    import requests
+    from bs4 import BeautifulSoup
+    from extract_keywords import extract_keywords
+
+    # 초기화 된 article_json으로부터 article_url을 통해 남은 속성들을 하나씩 완성함
+    for i in range(len(article_list)):
+        # article_json의 article_url을 통해 내용을 response 받음
+        res = requests.get(article_list[i]['article_url']).text
         res = BeautifulSoup(res, 'html.parser')
+        
+        # exception이 없는 경우
+        # article_media_list, article_media_url, article_media_image_src
+        article_media_name =  res.find('img', 'media_end_head_top_logo_img light_type')['title']
+        article_media_url = res.find('a', 'media_end_head_top_logo')['href']
+        article_media_image_src = res.find('img', 'media_end_head_top_logo_img light_type')['src']
 
-        ############## ############# ###################
-        # news_media # # media_url # # media_image_src #
-        ############## ############# ###################
-
-        news_media =  res.find('img', 'media_end_head_top_logo_img light_type')['title']
-        media_url = res.find('a', 'media_end_head_top_logo')['href']
-        media_image_src = res.find('img', 'media_end_head_top_logo_img light_type')['src']
-
-         # To-do: 기자를 어디서 찾을 것아며 어떻게 기자가 없는 상황을 방지할 수 있을까?
-        #################
-        # news_reporter #
-        #################
+        # exception이 있는 경우
+        # article_reporter
+        # 간혹 속보 같은 경우, article_reporter가 없는 상태로 기사 나옴
         try:
-            news_reporter = res.find('span', 'byline_s').text
+            article_reporter = res.find('span', 'byline_s').text
         except:
-            news_reporter = '기자 없음'
+            article_reporter = '기자 없음'
 
-        #############
-        # timestamp #
-        #############
-        # if) 수정시간 find할 수 없다면, timestamp는 작성시간
+        # exception이 있는 경우
+        # article_last_modified_date
+        # media_end_head_info_datestamp_time _ARTICLE_MODIFY_DATE_TIME가 없다면 (= 수정된 적이 없다면) 
+        # media_end_head_info_datestamp_time _ARTICLE_DATE_TIME가 article_last_modified_date가 됨
         try:
-            timestamp = res.find('span', 'media_end_head_info_datestamp_time _ARTICLE_DATE_TIME').text
-            timestamp = res.find('span', 'media_end_head_info_datestamp_time _ARTICLE_MODIFY_DATE_TIME').text
+            article_last_modified_time = res.find('span', 'media_end_head_info_datestamp_time _ARTICLE_DATE_TIME').text
+            article_last_modified_time = res.find('span', 'media_end_head_info_datestamp_time _ARTICLE_MODIFY_DATE_TIME').text
         except:
             pass
 
-        keyword1, keyword2, keyword3 = konlpy_test.get_keywords(res, news_list[i]['news_title'], news_media)
-        print(news_list[i]['news_title'] + ' | ' + news_list[i]['news_url'] + ' | ' + keyword1 + ' ' + keyword2 + ' ' + keyword3)
+        # extract_keyword 함수 호출
+        # res = 기사 내용, article_list[i]['article_title'] = 기사 제목, article_media_name = 언론사
+        keyword1, keyword2, keyword3 = extract_keywords(res, article_list[i]['article_title'], article_media_name)
 
-        # news 완성
-        news_list[i]['news_reporter'] = news_reporter
-        news_list[i]['news_media'] = news_media
-        news_list[i]['media_url'] = media_url
-        news_list[i]['media_image_src'] = media_image_src
-        news_list[i]['timestamp'] = timestamp
+        # 하나의 article_json 완성
+        article_list[i]['article_reporter'] = article_reporter
+        article_list[i]['article_media_name'] = article_media_name
+        article_list[i]['article_media_url'] = article_media_url
+        article_list[i]['article_media_image_src'] = article_media_image_src
+        article_list[i]['article_last_modified_time'] = article_last_modified_time
+        article_list[i]['keyword1'] = keyword1
+        article_list[i]['keyword2'] = keyword2
+        article_list[i]['keyword3'] = keyword3
 
-        # To-do: 어떤식으로 기사 본문에서 키워드를 추출할 것인가?
+        print(article_list[i])
 
-        # To-do: 어떤식으로 DB에 전달할 수 있을 것이며 중복을 어떻게 처리할 것인가?
+    return article_list
 
-    return news_list
