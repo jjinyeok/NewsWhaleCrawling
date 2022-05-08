@@ -5,9 +5,8 @@
 # param: 
 # res = 기사 본문이 들어 있는 html 형식의 response
 # news_title = 기사 제목
-# news_media = 언론사 (영어 기사 같은 경우, 키워드를 추출할 수 없어 키워드 '영어 기사'로 통일)
 # return: keyword1, keyword2, keyword3
-def extract_keywords (res, article_title, article_media_name):
+def extract_keywords (res, article_title):
 
     # Komoran Model: 테스트 상 가장 키워드를 잘 추출하였음
     from konlpy.tag import Komoran
@@ -15,7 +14,7 @@ def extract_keywords (res, article_title, article_media_name):
 
     from black_list import black_list
 
-    article_content = str(res.find('div', id='dic_area'))
+    article_content = str(res.find('div', 'news_view'))
     komoran = Komoran()
 
     # article_title로부터 명사 추출
@@ -31,10 +30,6 @@ def extract_keywords (res, article_title, article_media_name):
 
     sorted_keyword_dic = sorted(keyword_dic.items(), key = lambda item: -item[1])
 
-    # 영어 기사인 경우, Komoran으로는 키워드를 추출할 수 없고, 사용자들이 원할 가능성이 적기 때문에 '영어 기사'라는 키워드로 대체
-    if article_media_name == '코리아헤럴드' or article_media_name == '코리아중앙데일리':
-        return '영어 기사', '영어 기사', '영어 기사'
-
     # 가장 많이 인용된 명사 중 블랙리스트에 없고 명사의 1글자가 아니라면 기사에 대한 키워드
     # 기사에 대한 키워드 총 3개를 뽑아냄
     limit = 0
@@ -47,4 +42,3 @@ def extract_keywords (res, article_title, article_media_name):
             break
 
     return keywords[0], keywords[1], keywords[2]
-
