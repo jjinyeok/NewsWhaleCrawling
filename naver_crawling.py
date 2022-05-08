@@ -25,7 +25,7 @@
 #     "article_media_name", (언론사 이름) O
 #     "article_media_url", (언론사 URL)O
 #     "article_media_image_src", (언론사 이미지 소스) O
-#     "article_last_modified_time" (최종수정일자) O
+#     "article_last_modified_date" (최종수정일자) O
 #     ---DB의 article_keyword Table로 이동---
 #     "keyword1", (연관키워드 1)
 #     "keyword2", (연관키워드 2)
@@ -94,7 +94,7 @@ def complete_articles(article_list):
     
     import requests
     from bs4 import BeautifulSoup
-    from extract_keywords import extract_keywords
+    from naver_extract_keywords import extract_keywords
 
     # 초기화 된 article_json으로부터 article_url을 통해 남은 속성들을 하나씩 완성함
     for i in range(len(article_list)):
@@ -118,11 +118,11 @@ def complete_articles(article_list):
 
         # exception이 있는 경우
         # article_last_modified_date
-        # media_end_head_info_datestamp_time _ARTICLE_MODIFY_DATE_TIME가 없다면 (= 수정된 적이 없다면) 
-        # media_end_head_info_datestamp_time _ARTICLE_DATE_TIME가 article_last_modified_date가 됨
+        # media_end_head_info_datestamp_date _ARTICLE_MODIFY_DATE_TIME가 없다면 (= 수정된 적이 없다면) 
+        # media_end_head_info_datestamp_date _ARTICLE_DATE_TIME가 article_last_modified_date가 됨
         try:
-            article_last_modified_time = res.find('span', 'media_end_head_info_datestamp_time _ARTICLE_DATE_TIME').text
-            article_last_modified_time = res.find('span', 'media_end_head_info_datestamp_time _ARTICLE_MODIFY_DATE_TIME').text
+            article_last_modified_date = res.find('span', 'media_end_head_info_datestamp_time _ARTICLE_DATE_TIME').text
+            article_last_modified_date = res.find('span', 'media_end_head_info_datestamp_time _ARTICLE_MODIFY_DATE_TIME').text
         except:
             pass
 
@@ -135,7 +135,7 @@ def complete_articles(article_list):
         article_list[i]['article_media_name'] = article_media_name
         article_list[i]['article_media_url'] = article_media_url
         article_list[i]['article_media_image_src'] = article_media_image_src
-        article_list[i]['article_last_modified_time'] = article_last_modified_time
+        article_list[i]['article_last_modified_date'] = article_last_modified_date.split()[0]
         article_list[i]['keyword1'] = keyword1
         article_list[i]['keyword2'] = keyword2
         article_list[i]['keyword3'] = keyword3
