@@ -1,5 +1,6 @@
 
 from db_conn import db
+from delete import delete
 
 import time
 start = time.time()
@@ -14,6 +15,8 @@ db = db
 
 # cursor 생성
 cursor = db.cursor()
+
+delete(db)
 
 # article INSERT
 article_insert_sql = """
