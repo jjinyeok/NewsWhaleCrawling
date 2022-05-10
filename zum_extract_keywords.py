@@ -5,9 +5,8 @@
 # param: 
 # res = 기사 본문이 들어 있는 html 형식의 response
 # news_title = 기사 제목
-# news_media = 언론사 (영어 기사 같은 경우, 키워드를 추출할 수 없어 키워드 '영어 기사'로 통일)
 # return: keyword1, keyword2, keyword3
-def extract_keywords (res, article_title, article_media_name):
+def extract_keywords (res, article_title):
 
     # Komoran Model: 테스트 상 가장 키워드를 잘 추출하였음
     from konlpy.tag import Komoran
@@ -15,20 +14,13 @@ def extract_keywords (res, article_title, article_media_name):
 
     from black_list import black_list
 
-    article_content = str(res.find('div', id='dic_area'))
+    article_content = str(res.find('div', id='article_body'))
     komoran = Komoran()
 
     # article_title로부터 명사 추출
     keyword_from_title = komoran.nouns(article_title)
     # article_content로부터 명사 추출
     keyword_from_content = komoran.nouns(article_content)
-
-    # print(keyword_from_title)
-    # print(keyword_from_content)
-
-    # 영어 기사인 경우, Komoran으로는 키워드를 추출할 수 없고, 사용자들이 원할 가능성이 적기 때문에 '영어 기사'라는 키워드로 대체
-    if keyword_from_title == []:
-        return '영어 기사', '영어 기사', '영어 기사'
 
     # 제목으로부터 나온 키워드는 2의 가중치를 둠
     # 내용으로부터 나온 키워드는 1의 가중치를 둠
