@@ -42,7 +42,7 @@ def complete_articles(article_list):
         try:
             article_reporter = res.find('span', 'byline_s').text
         except:
-            article_reporter = '기자 없음'
+            article_reporter = ''
 
         # exception이 있는 경우
         # article_last_modified_date
@@ -68,7 +68,7 @@ def complete_articles(article_list):
         article_list[i]['keyword2'] = keyword2
         article_list[i]['keyword3'] = keyword3
 
-        print(article_list[i])
+        # print(article_list[i])
 
     return article_list
 
