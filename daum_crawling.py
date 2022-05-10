@@ -32,6 +32,7 @@ def init_articles():
     
     return article_list
 
+
 def complete_articles(article_list):
 
     import requests
