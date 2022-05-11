@@ -26,10 +26,6 @@ def extract_keywords (res, article_title, article_media_name):
     # print(keyword_from_title)
     # print(keyword_from_content)
 
-    # 영어 기사인 경우, Komoran으로는 키워드를 추출할 수 없고, 사용자들이 원할 가능성이 적기 때문에 '영어 기사'라는 키워드로 대체
-    if keyword_from_title == []:
-        return '영어 기사', '영어 기사', '영어 기사'
-
     # 제목으로부터 나온 키워드는 2의 가중치를 둠
     # 내용으로부터 나온 키워드는 1의 가중치를 둠
     # 명사가 사용된 빈도수를 계산
@@ -49,4 +45,7 @@ def extract_keywords (res, article_title, article_media_name):
         if limit == 3:
             break
 
-    return keywords[0], keywords[1], keywords[2]
+    try:
+        return keywords[0], keywords[1], keywords[2]
+    except:
+        return '', '', ''
