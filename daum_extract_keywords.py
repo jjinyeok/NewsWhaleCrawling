@@ -41,4 +41,8 @@ def extract_keywords (res, article_title):
         if limit == 3:
             break
 
-    return keywords[0], keywords[1], keywords[2]
+    try:
+        return keywords[0], keywords[1], keywords[2]
+    except:
+        return '', '', ''
+

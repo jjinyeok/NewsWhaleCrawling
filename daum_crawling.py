@@ -1,5 +1,5 @@
 
-black_list = [
+black_list_in_daum = [
     '뉴스홈',
     '사회',
     '정치',
@@ -27,7 +27,7 @@ def init_articles():
     articles_a_tag_in_main_page = res.find_all('a', 'link_txt')
     for article in articles_a_tag_in_main_page:
         #print(article['href'].split('/')[3])
-        if article.text not in black_list and article['href'].split('/')[3] == 'v':
+        if article.text not in black_list_in_daum and article['href'].split('/')[3] == 'v':
             article_list.append({'article_title': article.text.strip(), 'article_url': article['href']})
     
     return article_list
