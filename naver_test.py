@@ -1,0 +1,2 @@
+from naver_articles_to_db import naver_articles_to_db
+naver_articles_to_db()
