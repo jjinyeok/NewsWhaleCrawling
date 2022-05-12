@@ -1,0 +1,2 @@
+from zum_articles_to_db import zum_articles_to_db
+zum_articles_to_db()
