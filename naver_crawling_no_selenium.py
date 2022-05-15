@@ -3,7 +3,7 @@ def init_articles():
 
     import requests
     from bs4 import BeautifulSoup
-    res = requests.get('https://news.naver.com/main/ranking/popularDay.naver',  headers={'User-Agent':'Mozilla/5.0'})
+    res = requests.get('https://news.naver.com/main/ranking/popularDay.naver', headers={'User-Agent':'Mozilla/5.0'})
     res = BeautifulSoup(res.text, 'html.parser')
 
     article_list = []
@@ -27,7 +27,7 @@ def complete_articles(article_list):
     # 초기화 된 article_json으로부터 article_url을 통해 남은 속성들을 하나씩 완성함
     for i in range(len(article_list)):
         # article_json의 article_url을 통해 내용을 response 받음
-        res = requests.get(article_list[i]['article_url']).text
+        res = requests.get(article_list[i]['article_url'], headers={'User-Agent':'Mozilla/5.0'}).text
         res = BeautifulSoup(res, 'html.parser')
         
         # exception이 없는 경우

@@ -8,7 +8,7 @@ def init_articles():
     zum_news = 'https://news.zum.com'
 
     article_list = []
-    res = requests.get('https://news.zum.com/?cm=front_gnb')
+    res = requests.get('https://news.zum.com/?cm=front_gnb', headers={'User-Agent':'Mozilla/5.0'})
     res = BeautifulSoup(res.text, 'html.parser')
 
     articles_a_tag_in_main_page = res.find_all('a', 'item')
@@ -38,7 +38,7 @@ def complete_articles(article_list):
     for i in range(len(article_list)):
         
         # article_json의 article_url을 통해 내용을 response 받음
-        res = requests.get(article_list[i]['article_url'])
+        res = requests.get(article_list[i]['article_url'], headers={'User-Agent':'Mozilla/5.0'})
         res = BeautifulSoup(res.text, 'html.parser')
 
         head_view = res.find('header', 'article_header')
