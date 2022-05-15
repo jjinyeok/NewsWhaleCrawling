@@ -123,15 +123,150 @@ keyword_select_sql = """
     WHERE keyword_name=%s
 """
 
-for keywords in request_body.values():
-    keyword_ids = []
+# politics_count UPDATE문
+keyword_politics_count_update_sql =  """
+    UPDATE keyword
+    SET politics_count=%s
+    WHERE keyword_name=%s
+"""
+
+# economy_count UPDATE문
+keyword_economy_count_update_sql =  """
+    UPDATE keyword
+    SET economy_count=%s
+    WHERE keyword_name=%s
+"""
+
+# society_count UPDATE문
+keyword_society_count_update_sql =  """
+    UPDATE keyword
+    SET society_count=%s
+    WHERE keyword_name=%s
+"""
+
+# culture_count UPDATE문
+keyword_culture_count_update_sql =  """
+    UPDATE keyword
+    SET culture_count=%s
+    WHERE keyword_name=%s
+"""
+
+# international_count UPDATE문
+keyword_international_count_update_sql =  """
+    UPDATE keyword
+    SET international_count=%s
+    WHERE keyword_name=%s
+"""
+
+# local_count UPDATE문
+keyword_local_count_update_sql =  """
+    UPDATE keyword
+    SET local_count=%s
+    WHERE keyword_name=%s
+"""
+
+# sports_count UPDATE문
+keyword_sports_count_update_sql =  """
+    UPDATE keyword
+    SET sports_count=%s
+    WHERE keyword_name=%s
+"""
+
+# it_science_count UPDATE문
+keyword_it_science_count_update_sql =  """
+    UPDATE keyword
+    SET it_science_count=%s
+    WHERE keyword_name=%s
+"""
+
+# politics_count INSERT문
+keyword_politics_count_insert_sql = """
+    INSERT INTO keyword (keyword_name, politics_count, economy_count, society_count, culture_count, international_count, local_count, sports_count, it_science_count)
+    VALUES (%s, 1, 0, 0, 0, 0, 0, 0, 0)
+"""
+
+# economy_count INSERT문
+keyword_economy_count_insert_sql = """
+    INSERT INTO keyword (keyword_name, politics_count, economy_count, society_count, culture_count, international_count, local_count, sports_count, it_science_count)
+    VALUES (%s, 0, 1, 0, 0, 0, 0, 0, 0)
+"""
+
+# society_count INSERT문
+keyword_society_count_insert_sql = """
+    INSERT INTO keyword (keyword_name, politics_count, economy_count, society_count, culture_count, international_count, local_count, sports_count, it_science_count)
+    VALUES (%s, 0, 0, 1, 0, 0, 0, 0, 0)
+"""
+
+# culture_count INSERT문
+keyword_culture_count_insert_sql = """
+    INSERT INTO keyword (keyword_name, politics_count, economy_count, society_count, culture_count, international_count, local_count, sports_count, it_science_count)
+    VALUES (%s, 0, 0, 0, 1, 0, 0, 0, 0)
+"""
+
+# international_count INSERT문
+keyword_international_count_insert_sql = """
+    INSERT INTO keyword (keyword_name, politics_count, economy_count, society_count, culture_count, international_count, local_count, sports_count, it_science_count)
+    VALUES (%s, 0, 0, 0, 0, 1, 0, 0, 0)
+"""
+
+# local_count INSERT문
+keyword_local_count_insert_sql = """
+    INSERT INTO keyword (keyword_name, politics_count, economy_count, society_count, culture_count, international_count, local_count, sports_count, it_science_count)
+    VALUES (%s, 0, 0, 0, 0, 0, 1, 0, 0)
+"""
+
+# sports_count INSERT문
+keyword_sports_count_insert_sql = """
+    INSERT INTO keyword (keyword_name, politics_count, economy_count, society_count, culture_count, international_count, local_count, sports_count, it_science_count)
+    VALUES (%s, 0, 0, 0, 0, 0, 0, 1, 0)
+"""
+
+# it_science_count INSERT문
+keyword_it_science_count_insert_sql = """
+    INSERT INTO keyword (keyword_name, politics_count, economy_count, society_count, culture_count, international_count, local_count, sports_count, it_science_count)
+    VALUES (%s, 0, 0, 0, 0, 0, 0, 0, 1)
+"""
+
+for key, keywords in request_body.items():
     for keyword in keywords:
         cursor.execute(keyword_select_sql, keyword)
-        keyword_id = cursor.fetchone()
-        if keyword_id != None:
+        sql_result = cursor.fetchone()
+        if sql_result != None:
             # keyword가 등록되어 있는 경우 -> update
-            keyword_ids.append(keyword_id)
+            if key == 'politics':
+                cursor.execute(keyword_politics_count_update_sql, (sql_result[7] + 1, sql_result[5]))
+            elif key == 'economy':
+                cursor.execute(keyword_economy_count_update_sql, (sql_result[2] + 1, sql_result[5]))
+            elif key == 'society':
+                cursor.execute(keyword_society_count_update_sql, (sql_result[8] + 1, sql_result[5]))
+            elif key == 'culture':
+                cursor.execute(keyword_culture_count_update_sql, (sql_result[1] + 1, sql_result[5]))
+            elif key == 'international':
+                cursor.execute(keyword_international_count_update_sql, (sql_result[3] + 1, sql_result[5]))
+            elif key == 'local':
+                cursor.execute(keyword_local_count_update_sql, (sql_result[6] + 1, sql_result[5]))
+            elif key == 'sports':
+                cursor.execute(keyword_sports_count_update_sql, (sql_result[9] + 1, sql_result[5]))
+            elif key == 'it_science':
+                cursor.execute(keyword_it_science_count_update_sql, (sql_result[4] + 1, sql_result[5]))
         else:
             # keyword가 등록되어 있지 않는 경우 -> insert
-            pass
-    print(keyword_ids)
+            if key == 'politics':
+                cursor.execute(keyword_politics_count_insert_sql, keyword)
+            elif key == 'economy':
+                cursor.execute(keyword_economy_count_insert_sql, keyword)
+            elif key == 'society':
+                cursor.execute(keyword_society_count_insert_sql, keyword)
+            elif key == 'culture':
+                cursor.execute(keyword_culture_count_insert_sql, keyword)
+            elif key == 'international':
+                cursor.execute(keyword_international_count_insert_sql, keyword)
+            elif key == 'local':
+                cursor.execute(keyword_local_count_insert_sql, keyword)
+            elif key == 'sports':
+                cursor.execute(keyword_sports_count_insert_sql, keyword)
+            elif key == 'it_science':
+                cursor.execute(keyword_it_science_count_insert_sql, keyword)
+
+db.commit()
+db.close()
