@@ -1,2 +1,0 @@
-from daum_articles_to_db import daum_articles_to_db
-daum_articles_to_db()

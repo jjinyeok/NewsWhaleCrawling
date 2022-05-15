@@ -21,7 +21,7 @@ def init_articles():
     from bs4 import BeautifulSoup
 
     article_list = []
-    res = requests.get('https://news.daum.net/')
+    res = requests.get('https://news.daum.net/', headers={'User-Agent':'Mozilla/5.0'})
     res = BeautifulSoup(res.text, 'html.parser')
 
     articles_a_tag_in_main_page = res.find_all('a', 'link_txt')
@@ -44,7 +44,7 @@ def complete_articles(article_list):
     for i in range(len(article_list)):
         
         # article_json의 article_url을 통해 내용을 response 받음
-        res = requests.get(article_list[i]['article_url'])
+        res = requests.get(article_list[i]['article_url'], headers={'User-Agent':'Mozilla/5.0'})
         res = BeautifulSoup(res.text, 'html.parser')
         head_view = res.find('div', 'head_view')
         article_reporter = head_view.find('span', 'txt_info').text
