@@ -5,9 +5,14 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+
+import os
+driver_path = os.path.join(os.path.dirname(__file__), 'chromedriver')
 chrome_options = webdriver.ChromeOptions()
-chrome_options.headless = True
-driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+chrome_options.add_argument('--headless')
+chrome_options.add_argument('--no-sandbox')
+chrome_options.add_argument('--disable-dev-shm-usage')
+driver = webdriver.Chrome(driver_path, options=chrome_options)
 
 from db_conn import db
 
